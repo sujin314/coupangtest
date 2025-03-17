@@ -14,7 +14,7 @@ from tests.page.mainpage import MainPage
 @pytest.mark.usefixtures("driver") 
 class TestMainPage:
 
-# 1. 로그인 전 검색
+# 로그인 전 검색
 # 2. 메인 페이지 접속
     def test_open_main_page(self, driver: WebDriver):
         try:
@@ -43,3 +43,44 @@ class TestMainPage:
          
         except NoSuchElementException as e:
             assert False
+
+
+# 로그인 후 검색
+# 1. 메인페이지 열기
+    def test_click_link_text(self, driver: WebDriver):
+
+        try:
+            main_page = MainPage(driver)
+            main_page.open()
+
+            time.sleep(2)
+
+            wait = ws(driver, 10)
+            wait.until(EC.url_contains("coupang.com"))
+            assert "coupang.com" in driver.current_url
+
+# 2. 로그인 버튼 클릭 후 로그인 화면 이동
+            main_page.click_by_LINK_TEXT('로그인')
+# 3. 로그인
+            main_page.login()
+            assert "mypage" in driver.current_url
+            driver.save_screenshot('로그인-성공.png')
+
+            time.sleep(2)
+            driver.back()
+
+            wait.until(EC.url_contains("coupang.com"))
+            assert "coupang.com" in driver.current_url
+
+        except NoSuchElementException as e:
+            driver.save_screenshot('메인페이지-링크텍스트-실패-노서치.png')
+            assert False
+        except TimeoutError as e:
+            driver.save_screenshot('메인페이지-링크텍스트-실패-타임에러.png')
+            assert False
+
+
+# 2. "노트북" 검색
+# 3. 검색 결과 나타날 때까지 대기
+# 4. 검색 결과 가져오기
+# 5. 검색 결과 확인 
