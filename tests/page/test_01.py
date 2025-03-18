@@ -10,6 +10,7 @@ from selenium.webdriver.common.by import By
 from urllib import parse
 
 from tests.page.mainpage import MainPage
+from tests.page.loginpage import LoginPage
 
 @pytest.mark.usefixtures("driver") 
 class TestMainPage:
@@ -44,11 +45,9 @@ class TestMainPage:
         except NoSuchElementException as e:
             assert False
 
-
 # 로그인 후 검색
 # 1. 메인페이지 열기
     def test_click_link_text(self, driver: WebDriver):
-
         try:
             main_page = MainPage(driver)
             main_page.open()
@@ -60,9 +59,11 @@ class TestMainPage:
             assert "coupang.com" in driver.current_url
 
 # 2. 로그인 버튼 클릭 후 로그인 화면 이동
-            main_page.click_by_LINK_TEXT('로그인')
+            login_page = LoginPage(driver)
+            login_page.click_by_LINK_TEXT('로그인')
 # 3. 로그인
-            main_page.login()
+            login_page.login()
+            wait.until(EC.url_contains("mypage"))
             assert "mypage" in driver.current_url
             driver.save_screenshot('로그인-성공.png')
 

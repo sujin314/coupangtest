@@ -23,32 +23,3 @@ class MainPage:
         search_input_box.clear()
         search_input_box.send_keys(item_name)
         search_input_box.send_keys(Keys.ENTER)
-
-    # 로그인 버튼 클릭
-    def click_login(self):
-        login_button = WebDriverWait(self.driver, 10).until(
-            EC.element_to_be_clickable((By.LINK_TEXT, self.LOGIN_LINK_TEXT))
-        )
-        login_button.click()
-
-    # 로그인
-    def login(self):
-        try:
-            from tests.page.password import ID, PASSWORD
-        except ImportError:
-            ID = "test_user"
-            PASSWORD = "test_password"
-            print("⚠️ config_private.py 파일이 없습니다. 테스트용 기본값을 사용합니다.")
-        username_field = self.driver.find_element(By.ID, "user_id")
-        password_field = self.driver.find_element(By.ID, "password")
-        login_button = self.driver.find_element(By.ID, "login_button")
-        username_field.send_keys(ID)
-        password_field.send_keys(PASSWORD)
-        login_button.click()
-
-    # 링크 텍스트 버튼 클릭
-    def click_by_LINK_TEXT(self, link_text: str):
-        login_button = self.driver.find_element(By.LINK_TEXT, link_text)
-        login_button.click()
-
-
