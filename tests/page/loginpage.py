@@ -1,6 +1,8 @@
+import time
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.keys import Keys
 
 class LoginPage:
     def __init__(self, driver):
@@ -28,9 +30,7 @@ class LoginPage:
         )
         login_button.click()
 
-
-
-    # 로그인
+    # 로그인 정보 입력
     def login(self, username=None, password=None):
         if username is None or password is None:
             try:
@@ -43,15 +43,18 @@ class LoginPage:
             ID = username
             PASSWORD = password
 
-    # 로그인 입력 필드 찾기 (대기 추가)
         id_input = self.wait.until(EC.presence_of_element_located((By.ID, "login-email-input")))
-        pw_input = self.wait.until(EC.presence_of_element_located((By.ID, "login-password-input")))
-        login_button = self.wait.until(EC.presence_of_element_located((By.ID, "login-button")))
-
-    # 로그인 정보 입력
+        id_input.click()
+        time.sleep(1)
         id_input.send_keys(ID)
-        pw_input.send_keys(PASSWORD)
-        login_button.click()
 
+        pw_input = self.wait.until(EC.presence_of_element_located((By.ID, "login-password-input")))
+        pw_input.click()
+        time.sleep(1)
+        pw_input.send_keys(PASSWORD) 
+
+        pw_input.send_keys(Keys.RETURN)
+        time.sleep(2)
+    
     # 로그인 후 페이지 로딩 대기
         WebDriverWait(self.driver, 10).until(EC.url_contains("mypage"))
