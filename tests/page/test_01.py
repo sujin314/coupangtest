@@ -1,73 +1,87 @@
-import pytest
-from selenium.webdriver.support.ui import WebDriverWait
+import time
+
+import pytest 
+from selenium.webdriver.support.ui import WebDriverWait as ws
 from selenium.webdriver.support import expected_conditions as EC
-from selenium import webdriver
 from selenium.webdriver.chrome.webdriver import WebDriver
-from tests.page.mainpage import MainPage
+from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.by import By
-from selenium.webdriver.common.keys import Keys
 
+from urllib import parse
 
-# 1. 로그인 전 검색
+from tests.page.mainpage import MainPage
+from tests.page.loginpage import LoginPage
+
+@pytest.mark.usefixtures("driver") 
+class TestMainPage:
+
+# 로그인 전 검색
 # 2. 메인 페이지 접속
-@pytest.fixture
-def driver():
-    driver = webdriver.Chrome()
-    driver.get("https://www.coupang.com/")
-    yield driver
-    driver.quit()
+    def test_open_main_page(self, driver: WebDriver):
+        try:
+            ITEMS_XPATH = "//form//ul/li"
+            main_page = MainPage(driver)
+            main_page.open()
 
-def test_open_main_page(driver: WebDriver):
-    main_page = MainPage(driver)
-    main_page.open()
-    WebDriverWait(driver, 10).until(EC.url_contains("coupang.com"))
-    assert "coupang.com" in driver.current_url
+            wait = ws(driver, 10)
+            wait.until(EC.url_contains("coupang.com"))
+            assert "coupang.com" in driver.current_url
+            time.sleep(2)
 
-# 3. 검색창 찾기
-def test_search_product()
-search_box = driver.find_element(By.ID, "headerSearchKeyword")
+# 3. "노트북" 검색.. 
+            main_page.search_items('노트북')
 
-# 4. 검색창 "노트북" 작성, 엔터
-search_box.send_keys("노트북")
-search_box.send_keys(Keys.RETURN)
+# 4. 검색 결과 나타날 때까지 대기
+            ws(driver, 10).until(EC.presence_of_element_located((By.XPATH, ITEMS_XPATH)))
 
-# 5. 결과 확인
-assert "노트북" in driver.title
+# 5. 검색 결과 가져오기
+            items = driver.find_elements(By.XPATH, ITEMS_XPATH)
+            item_name = parse.quote('노트북')
+
+# 6. 검색 결과 확인
+            assert len(items) > 0
+            assert item_name in driver.current_url
+         
+        except NoSuchElementException as e:
+            assert False
+
+# 로그인 후 검색
+# 1. 메인페이지 열기
+    def test_click_link_text(self, driver: WebDriver):
+        try:
+            main_page = MainPage(driver)
+            main_page.open()
+
+            time.sleep(2)
+
+            wait = ws(driver, 10)
+            wait.until(EC.url_contains("coupang.com"))
+            assert "coupang.com" in driver.current_url
+
+# 2. 로그인 버튼 클릭 후 로그인 화면 이동
+            login_page = LoginPage(driver)
+            login_page.click_by_LINK_TEXT('로그인')
+# 3. 로그인
+            login_page.login()
+            wait.until(EC.url_contains("mypage"))
+            assert "mypage" in driver.current_url
+            driver.save_screenshot('로그인-성공.png')
+
+            time.sleep(2)
+            driver.back()
+
+            wait.until(EC.url_contains("coupang.com"))
+            assert "coupang.com" in driver.current_url
+
+        except NoSuchElementException as e:
+            driver.save_screenshot('메인페이지-링크텍스트-실패-노서치.png')
+            assert False
+        except TimeoutError as e:
+            driver.save_screenshot('메인페이지-링크텍스트-실패-타임에러.png')
+            assert False
 
 
-
-
-# def test_search_with_login(driver):
-#     """ 로그인 후 검색 기능 테스트 """
-#     driver.get("https://www.coupang.com/")  
-
-#     # 로그인 버튼 클릭
-#     login_button = driver.find_element(By.XPATH, "//a[contains(text(), '로그인')]")
-#     login_button.click()
-
-#     # 로그인 정보 입력
-#     username = driver.find_element(By.NAME, "loginEmail")  # 이메일 입력창
-#     password = driver.find_element(By.NAME, "password")  # 비밀번호 입력창
-
-#     username.send_keys("your_email@example.com")  # 여기에 실제 이메일 입력
-#     password.send_keys("your_password")  # 여기에 실제 비밀번호 입력
-#     password.send_keys(Keys.RETURN)  # 로그인 실행
-
-#     # 로그인 성공 확인 (예: 마이페이지 버튼 존재 여부)
-#     assert "마이쿠팡" in driver.page_source  
-
-#     # 검색 테스트 실행
-#     search_box = driver.find_element(By.NAME, "q")
-#     search_box.send_keys("노트북")
-#     search_box.send_keys(Keys.RETURN)
-
-#     assert "노트북" in driver.title  # 검색 결과 페이지 확인
-
-
-
-
-
-# 1. 로그인 후 검색
-# 2. 메인 페이지 접속
-# 3. 로그인 정보 입력
-# 4. 
+# 2. "노트북" 검색
+# 3. 검색 결과 나타날 때까지 대기
+# 4. 검색 결과 가져오기
+# 5. 검색 결과 확인 
